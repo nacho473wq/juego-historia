@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Preguntas - Movimiento Guevarista</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #game-container {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #question {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        #score-table {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Juego de Preguntas - Movimiento Guevarista</h1>
+        <div id="question-container">
+            <p id="question">Aquí aparecerá la pregunta</p>
+            <div id="answers">
+                <button class="answer-btn">Respuesta 1</button>
+                <button class="answer-btn">Respuesta 2</button>
+                <button class="answer-btn">Respuesta 3</button>
+                <button class="answer-btn">Respuesta 4</button>
+            </div>
+        </div>
+        <button id="next-btn" class="hide">Siguiente Pregunta</button>
+        <div id="score-table" class="hide">
+            <p>Puntaje final: <span id="final-score">0</span></p>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿En qué país nació Ernesto 'Che' Guevara?",
+                answers: [
+                    { text: "Bolivia", correct: false },
+                    { text: "Argentina", correct: true },
+                    { text: "Cuba", correct: false },
+                    { text: "México", correct: false }
+                ]
+            },
+            {
+                question: "¿En qué año fue asesinado el Che Guevara?",
+                answers: [
+                    { text: "1965", correct: false },
+                    { text: "1967", correct: true },
+                    { text: "1970", correct: false },
+                    { text: "1959", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué significaba la 'guerra de guerrillas' para el Che Guevara?",
+                answers: [
+                    { text: "Una táctica militar tradicional", correct: false },
+                    { text: "Un método de lucha para las clases populares", correct: true },
+                    { text: "Una forma de negociación política", correct: false },
+                    { text: "Una estrategia puramente defensiva", correct: false }
+                ]
+            },
+            {
+                question: "¿En qué país lideró el Che Guevara una revolución que resultó en la caída de un dictador?",
+                answers: [
+                    { text: "Argentina", correct: false },
+                    { text: "México", correct: false },
+                    { text: "Cuba", correct: true },
+                    { text: "Perú", correct: false }
+                ]
+            },
+            {
+                question: "¿Cuál era el objetivo principal del movimiento guevarista?",
+                answers: [
+                    { text: "Lograr acuerdos comerciales justos", correct: false },
+                    { text: "El establecimiento de gobiernos comunistas a través de la lucha armada", correct: true },
+                    { text: "Mantener las estructuras coloniales", correct: false },
+                    { text: "Promover el desarrollo capitalista en América Latina", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué libro escribió el Che Guevara sobre su experiencia en la Revolución Cubana?",
+                answers: [
+                    { text: "El Capital", correct: false },
+                    { text: "Diario del Che en Bolivia", correct: false },
+                    { text: "La Guerra de Guerrillas", correct: true },
+                    { text: "El Hombre Nuevo", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué cargo ocupó el Che Guevara en el gobierno revolucionario de Cuba?",
+                answers: [
+                    { text: "Ministro de Relaciones Exteriores", correct: false },
+                    { text: "Ministro de Industria", correct: true },
+                    { text: "Presidente del Parlamento", correct: false },
+                    { text: "Director del Banco Nacional", correct: false }
+                ]
+            },
+            {
+                question: "¿Dónde fue capturado y ejecutado el Che Guevara?",
+                answers: [
+                    { text: "En Colombia", correct: false },
+                    { text: "En Bolivia", correct: true },
+                    { text: "En Argentina", correct: false },
+                    { text: "En Venezuela", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué elemento central del marxismo adaptó el Che Guevara a la realidad latinoamericana?",
+                answers: [
+                    { text: "La lucha armada a través de la guerrilla rural", correct: true },
+                    { text: "La industrialización acelerada", correct: false },
+                    { text: "La planificación urbana", correct: false },
+                    { text: "El socialismo parlamentario", correct: false }
+                ]
+            },
+            {
+                question: "¿Cuál fue el impacto del guevarismo en América Latina?",
+                answers: [
+                    { text: "Generó movimientos revolucionarios en varios países", correct: true },
+                    { text: "No tuvo repercusión", correct: false },
+                    { text: "Solo influyó en las artes", correct: false },
+                    { text: "Se limitó a Cuba", correct: false }
+                ]
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        const questionElement = document.getElementById("question");
+        const answerButtons = document.querySelectorAll(".answer-btn");
+        const nextButton = document.getElementById("next-btn");
+        const finalScoreElement = document.getElementById("final-score");
+        const scoreTable = document.getElementById("score-table");
+
+        function startGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            nextButton.classList.add("hide");
+            scoreTable.classList.add("hide");
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            questionElement.innerText = currentQuestion.question;
+            answerButtons.forEach((button, index) => {
+                button.innerText = currentQuestion.answers[index].text;
+                button.dataset.correct = currentQuestion.answers[index].correct;
+                button.style.backgroundColor = "#007bff";
+                button.removeEventListener("click", selectAnswer);
+                button.addEventListener("click", selectAnswer);
+            });
+        }
+
+        function selectAnswer(e) {
+            const selectedButton = e.target;
+            const correct = selectedButton.dataset.correct === "true";
+            if (correct) {
+                selectedButton.style.backgroundColor = "green";
+                score += 10; // Sumar 10 puntos por respuesta correcta
+            } else {
+                selectedButton.style.backgroundColor = "red";
+            }
+            nextButton.classList.remove("hide");
+        }
+
+        nextButton.addEventListener("click", () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                showQuestion();
+                nextButton.classList.add("hide");
+            } else {
+                endGame();
+            }
+        });
+
+        function endGame() {
+            questionElement.innerText = "¡Juego terminado!";
+            scoreTable.classList.remove("hide");
+            finalScoreElement.innerText = score;
+            answerButtons.forEach(button => button.classList.add("hide"));
+            nextButton.classList.add("hide");
+        }
+
+        startGame();
+    </script>
+</body>
+</html>
